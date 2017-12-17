@@ -418,7 +418,7 @@ func Myriam()
       $text = OpticalRead(125,354-9,400,354+9)    ;read title bar
       if StringInStr($text, "Replace a Previously Enchanted Property")>0 then
         $CheckSumReplace = PixelCheckSum(125,361,400,361)
-        $text = "Select Replacement Property"
+        $text = "Replace Property"
       endif
     elseif $CheckSumReplace = PixelCheckSum(125,361,400,361) then
 ;      Print("click reroll bar")
