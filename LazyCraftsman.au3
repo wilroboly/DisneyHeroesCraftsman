@@ -16,7 +16,6 @@ GLOBAL $fontTitleHeight = 14
 GLOBAL $fontOptionHeight = 11
 GLOBAL $fontQuality = $CLEARTYPE_QUALITY
 
-
 ;---------------------------------------------------------------------------------------------------
 ; Left Window Position Constants
 ;---------------------------------------------------------------------------------------------------
@@ -55,6 +54,7 @@ GLOBAL $FillX=718, $FillY=841      ;Kanai Recipe Fill
 GLOBAL $ABORT = false
 GLOBAL $CLOCK = TimerInit()
 GLOBAL $PAUSE = 0
+
 func SetTimeOut($t)
   return( TimerDiff($CLOCK)-$PAUSE+$t )
 endfunc
@@ -66,6 +66,7 @@ endfunc
 func GetTimeOut($t)
   return( $t - TimerDiff($CLOCK) + $PAUSE )
 endfunc
+
 ;---------------------------------------------------------------------------------------------------
 ;          Screen Functions
 ;---------------------------------------------------------------------------------------------------
@@ -81,6 +82,7 @@ Func MouseClock()
 endfunc
 
 local $PrintTimeOut = SetTimeOut(60000)
+
 func Print($text)
   ToolTip( $text, Floor(100*$sRatio), Floor(50*$sRatio), "Info")
   $PrintTimeOut = SetTimeOut(5000)
@@ -101,6 +103,7 @@ endfunc
 func Terminate()
   exit(-1)
 endfunc
+
 func Stop()
   $ABORT = true
 endfunc
@@ -119,10 +122,8 @@ GLOBAL $DimX = 350
 GLOBAL $DimY = 300; 272
 GLOBAL $MW = GUICreate($TITLE, $DimX, $DimY)
 
-
 local $iY=8
 local $hGroupA = GUICtrlCreateGroup("", 5, $iY, $DimX-10,$DimY-19)
-; GUICtrlCreateLabel ( "text", left, top [, width [, height [, style = -1 [, exStyle = -1]]]] )
 local $hLabelA = GUICtrlCreateLabel("Options", 20,  $iY-5, $DimX-99, $fontLeading + 2)
 local $hLabelB = GUICtrlCreateLabel("Ctrl-Alt-U: Kanai Upgrade Rare", 20, 25+$iY, $DimX-99, $fontLeading)
 local $hLabelC = GUICtrlCreateLabel("Ctrl-Alt-C: Kanai Convert Mats", 20, 45+$iY, $DimX-40, $fontLeading)
@@ -146,7 +147,6 @@ local $hLabelG = GUICtrlCreateLabel("Ctrl-Alt-X: EXIT APPLICATION", 20, 30+$iY, 
 $iY += 53
 GUICtrlCreateGroup("", 11, $iY, $DimX-22, 32)
 local $hLabelH = GUICtrlCreateLabel(stringformat("Screen Size: W=%d H=%d Ratio=%.2f", $sWidth,$sHeight,$sRatio), 20, 10+$iY, $DimX-35, $fontLeading + 2)
-
 
 ;Set Fonts
 GUICtrlSetFont($hLabelA,  $fontTitleHeight, $FW_HEAVY, 0, $sFont, $fontQuality)
@@ -209,6 +209,7 @@ func OpticalRead ($x1,$y1,$x2,$y2)
 endfunc
 
 ;-------------------------------------------------------------------------------
+; Main GUISetState Routine
 ;-------------------------------------------------------------------------------
 GUISetState(@SW_SHOW)
 WHILE 1
@@ -222,7 +223,9 @@ WHILE 1
   endif
 WEND
 GUIDelete()
+
 ;-------------------------------------------------------------------------------
+; Ctrl-Alt Routines
 ;-------------------------------------------------------------------------------
 func IsKanaiEmpty($x,$y)
   $x = Floor(209*$sRatio)+Floor(56*$sRatio)*$x
@@ -242,6 +245,7 @@ func IsKanaiEmpty($x,$y)
   return(True)            ;if all pixels are background color, then it is empty
 endfunc
 
+; TODO: Fix the SearchPixel() function to use local values
 func IsRareItem($x,$y)
   $x = $InvX+$x*$DivInvX
   $y = $InvY+$y*$DivInvY
