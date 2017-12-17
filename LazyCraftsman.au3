@@ -1,12 +1,45 @@
 ;----------------------------------------------------------------------------
 ; Author:  BurgerKing
+; Updates by: Wilco
 ;----------------------------------------------------------------------------
-GLOBAL $TITLE = "The Lazy Craftsman 2.5";
-GLOBAL $sFont = "Courier New"
-
+#include <GuiListBox.au3>
+#include <GUIConstantsEx.au3>
+#include <guiconstants.au3>
+#include <ColorConstants.au3>
+#include <FontConstants.au3>
 #include <Color.au3>
+
+GLOBAL $TITLE = "The Lazy Craftsman 2.5";
+GLOBAL $sFont = "Calibri"
+GLOBAL $fontLeading = 18
+GLOBAL $fontTitleHeight = 14
+GLOBAL $fontOptionHeight = 11
+GLOBAL $fontQuality = $CLEARTYPE_QUALITY
+
+
 ;---------------------------------------------------------------------------------------------------
-;          D3 Inventory Box Constants
+; Left Window Position Constants
+;---------------------------------------------------------------------------------------------------
+GLOBAL $titleBarLeft = Floor(125*$sRatio)
+GLOBAL $titleBarTop = Floor(349*$sRatio)
+GLOBAL $titleBarRight = Floor(400*$sRatio)
+GLOBAL $titleBarBottom = Floor(367*$sRatio)
+
+;---------------------------------------------------------------------------------------------------
+; D3 Window Constants
+;---------------------------------------------------------------------------------------------------
+GLOBAL $sHeight = @DesktopHeight
+GLOBAL $sWidth = @DesktopWidth
+
+GLOBAL $bRatio=1.0 ; Base ration for 1920x1080
+GLOBAL $widthRatio=($sWidth/1920)
+GLOBAL $heightRatio=($sHeight/1080)
+
+; This is a temporary fix as we use proper screen res and ratios
+GLOBAL $sRatio=$widthRatio
+
+;---------------------------------------------------------------------------------------------------
+; D3 Inventory Box Constants
 ;---------------------------------------------------------------------------------------------------
 GLOBAL $InvX=1428.5, $InvY=583      ;Center of top left item on backpack
 GLOBAL $DivInvX=50.5        ;inventory square X size
@@ -17,7 +50,7 @@ GLOBAL $ForgeX=165, $ForgeY=288
 GLOBAL $FillX=718, $FillY=841      ;Kanai Recipe Fill
 
 ;----------------------------------------------------------------------------
-;      Timing Routines
+; Timing Routines
 ;----------------------------------------------------------------------------
 GLOBAL $ABORT = false
 GLOBAL $CLOCK = TimerInit()
@@ -44,12 +77,12 @@ endfunc
 
 Func MouseClock()
   local $t = (@SEC+@MSEC/1000) * 2 * 3.141592653589793 / 5    ;5 seconds to make a circle
-  MouseMove(960+240*sin($t),100,0)
+  MouseMove(Floor(960*$sRatio)+240*sin($t),100,0)
 endfunc
 
 local $PrintTimeOut = SetTimeOut(60000)
 func Print($text)
-  ToolTip( $text, 265, 190, "", 0, 2)
+  ToolTip( $text, Floor(100*$sRatio), Floor(50*$sRatio), "Info")
   $PrintTimeOut = SetTimeOut(5000)
 endfunc
 
@@ -79,70 +112,75 @@ HotKeySet( "^!m",  "Myriam" )
 HotKeySet( "^!a",  "Stop" )
 HotKeySet( "^!x",  "Terminate" )
 
-;------------------------------------------------------------------------------- 
+;-------------------------------------------------------------------------------
 ;  GUI Routines
-;------------------------------------------------------------------------------- 
-#include <GuiListBox.au3>
-#include <GUIConstantsEx.au3>
-#include <guiconstants.au3>
-#include <ColorConstants.au3>
+;-------------------------------------------------------------------------------
 GLOBAL $DimX = 350
-GLOBAL $DimY = 272
+GLOBAL $DimY = 300; 272
 GLOBAL $MW = GUICreate($TITLE, $DimX, $DimY)
 
-local $iY=10
-local $hGroupA = GUICtrlCreateGroup("",                                5,    $iY, $DimX-10,$DimY-19)
-local $hLabelA = GUICtrlCreateLabel($TITLE,                           20,  $iY-5, $DimX-99, 25)
-local $hLabelB = GUICtrlCreateLabel("Ctrl-Alt-U: Kanai Upgrade Rare", 20, 25+$iY, $DimX-99, 15)
-local $hLabelC = GUICtrlCreateLabel("Ctrl-Alt-C: Kanai Convert Mats", 20, 45+$iY, $DimX-40, 15)
-local $hLabelD = GUICtrlCreateLabel("Ctrl-Alt-S: BlackSmith Salvage", 20, 65+$iY, $DimX-40, 15)
 
-$iY += 85
-     GUICtrlCreateGroup("",                               11,    $iY, $DimX-22,105)
-local $hLabelE = GUICtrlCreateLabel("Ctrl-Alt-M: Myriam Enchantment", 20,    $iY, $DimX-99, 20)
-local $hLabel1 = GUICtrlCreateLabel("Property:",          30, 25+$iY,       80, 20)
-local $hInput1 = GUICtrlCreateInput("Critical Hit Damage",       115, 22+$iY,$DimX-135, 22)
-local $hLabel2 = GUICtrlCreateLabel("Value:   ",          30, 50+$iY,       80, 20)
-local $hInput2 = GUICtrlCreateInput("50",           115, 47+$iY,$DimX-135, 22)
-local $hLabel3 = GUICtrlCreateLabel("Retry:   ",          30, 75+$iY,       80, 20)
-local $hInput3 = GUICtrlCreateInput("100"      ,         115, 72+$iY,$DimX-135, 22)
+local $iY=8
+local $hGroupA = GUICtrlCreateGroup("", 5, $iY, $DimX-10,$DimY-19)
+; GUICtrlCreateLabel ( "text", left, top [, width [, height [, style = -1 [, exStyle = -1]]]] )
+local $hLabelA = GUICtrlCreateLabel("Options", 20,  $iY-5, $DimX-99, $fontLeading + 2)
+local $hLabelB = GUICtrlCreateLabel("Ctrl-Alt-U: Kanai Upgrade Rare", 20, 25+$iY, $DimX-99, $fontLeading)
+local $hLabelC = GUICtrlCreateLabel("Ctrl-Alt-C: Kanai Convert Mats", 20, 45+$iY, $DimX-40, $fontLeading)
+local $hLabelD = GUICtrlCreateLabel("Ctrl-Alt-S: BlackSmith Salvage", 20, 65+$iY, $DimX-40, $fontLeading)
+
+$iY += 87
+GUICtrlCreateGroup("", 11, $iY, $DimX-22,105)
+local $hLabelE = GUICtrlCreateLabel("Ctrl-Alt-M: Myriam Enchantment", 20, $iY, $DimX-99, $fontLeading)
+local $hLabel1 = GUICtrlCreateLabel("Property:", 30, 25+$iY, 80, $fontLeading + 2)
+local $hInput1 = GUICtrlCreateInput("Critical Hit Damage", 115, 22+$iY,$DimX-135, 22)
+local $hLabel2 = GUICtrlCreateLabel("Value:   ", 30, 50+$iY, 80, $fontLeading + 2)
+local $hInput2 = GUICtrlCreateInput("50", 115, 47+$iY,$DimX-135, 22)
+local $hLabel3 = GUICtrlCreateLabel("Retry:   ", 30, 75+$iY, 80, $fontLeading + 2)
+local $hInput3 = GUICtrlCreateInput("100"      , 115, 72+$iY,$DimX-135, 22)
 
 $iY += 105
-     GUICtrlCreateGroup("",                               11,    $iY, $DimX-22, 53)
-local $hLabelF = GUICtrlCreateLabel("Ctrl-Alt-A: Abort Current Task", 20, 10+$iY, $DimX-99, 20)
-local $hLabelG = GUICtrlCreateLabel("Ctrl-Alt-X: EXIT APPLICATION",   20, 30+$iY, $DimX-99, 20)
+GUICtrlCreateGroup("", 11, $iY, $DimX-22, 53)
+local $hLabelF = GUICtrlCreateLabel("Ctrl-Alt-A: Abort Current Task", 20, 10+$iY, $DimX-99, $fontLeading)
+local $hLabelG = GUICtrlCreateLabel("Ctrl-Alt-X: EXIT APPLICATION", 20, 30+$iY, $DimX-99, $fontLeading)
+
+$iY += 53
+GUICtrlCreateGroup("", 11, $iY, $DimX-22, 32)
+local $hLabelH = GUICtrlCreateLabel(stringformat("Screen Size: W=%d H=%d Ratio=%.2f", $sWidth,$sHeight,$sRatio), 20, 10+$iY, $DimX-35, $fontLeading + 2)
 
 
 ;Set Fonts
-GUICtrlSetFont($hLabelA,  14, 900, 0, $sFont, 5)
-GUICtrlSetFont($hLabelB,  11, 800, 0, $sFont, 5)
+GUICtrlSetFont($hLabelA,  $fontTitleHeight, $FW_HEAVY, 0, $sFont, $fontQuality)
+GUICtrlSetFont($hLabelB,  $fontOptionHeight, $FW_MEDIUM, 0, $sFont, $fontQuality)
 
-GUICtrlSetFont($hLabelC,  11, 800, 0, $sFont, 5)
-GUICtrlSetFont($hLabelD,  11, 800, 0, $sFont, 5)
-GUICtrlSetFont($hLabelE,  11, 800, 0, $sFont, 5)
+GUICtrlSetFont($hLabelC,  $fontOptionHeight, $FW_MEDIUM, 0, $sFont, $fontQuality)
+GUICtrlSetFont($hLabelD,  $fontOptionHeight, $FW_MEDIUM, 0, $sFont, $fontQuality)
+GUICtrlSetFont($hLabelE,  $fontOptionHeight, $FW_MEDIUM, 0, $sFont, $fontQuality)
 
-GUICtrlSetFont($hLabel1,  11, 800, 0, $sFont, 5)
-GUICtrlSetFont($hInput1,  11, 800, 0, $sFont, 5)
+GUICtrlSetFont($hLabel1,  $fontOptionHeight, $FW_MEDIUM, 0, $sFont, $fontQuality)
+GUICtrlSetFont($hInput1,  $fontOptionHeight, $FW_NORMAL, 0, $sFont, $fontQuality)
 
-GUICtrlSetFont($hLabel2,  11, 800, 0, $sFont, 5)
-GUICtrlSetFont($hInput2,  11, 800, 0, $sFont, 5)
+GUICtrlSetFont($hLabel2,  $fontOptionHeight, $FW_MEDIUM, 0, $sFont, $fontQuality)
+GUICtrlSetFont($hInput2,  $fontOptionHeight, $FW_NORMAL, 0, $sFont, $fontQuality)
 
-GUICtrlSetFont($hLabel3,  11, 800, 0, $sFont, 5)
-GUICtrlSetFont($hInput3,  11, 800, 0, $sFont, 5)
+GUICtrlSetFont($hLabel3,  $fontOptionHeight, $FW_MEDIUM, 0, $sFont, $fontQuality)
+GUICtrlSetFont($hInput3,  $fontOptionHeight, $FW_NORMAL, 0, $sFont, $fontQuality)
 
-GUICtrlSetFont($hLabelF,  11, 800, 0, $sFont, 5)
-GUICtrlSetFont($hLabelG,  11, 800, 0, $sFont, 5)
+GUICtrlSetFont($hLabelF,  $fontOptionHeight, $FW_MEDIUM, 0, $sFont, $fontQuality)
+GUICtrlSetFont($hLabelG,  $fontOptionHeight, $FW_MEDIUM, 0, $sFont, $fontQuality)
 
-GUICtrlSetColor($hLabelA,0xFF0000)
+GUICtrlSetFont($hLabelH,  $fontOptionHeight, $FW_NORMAL, 0, $sFont, $fontQuality)
+
+GUICtrlSetColor($hLabelA,0x009900)
 GUICtrlSetColor($hLabelB,0x0000FF)
 GUICtrlSetColor($hLabelC,0x0000FF)
 GUICtrlSetColor($hLabelD,0x0000FF)
 GUICtrlSetColor($hLabelE,0x0000FF)
 GUICtrlSetColor($hLabelF,0x0000FF)
 GUICtrlSetColor($hLabelG,0x0000FF)
+GUICtrlSetColor($hLabelH,0x0000FF)
 
-;------------------------------------------------------------------------------- 
-;------------------------------------------------------------------------------- 
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
 func GetNumber($temp)
   $temp = StringRegExpReplace($temp, "(?<=\d)O", "0")
   $temp = StringReplace($temp,",","")
@@ -162,7 +200,7 @@ func GetNumber($temp)
 endfunc
 
 func OpticalRead ($x1,$y1,$x2,$y2)
-;  Print( stringformat("%02d:%02d:%02d OCR",@HOUR,@MIN,@SEC) )
+  ;Print( stringformat("%02d:%02d:%02d OCR",@HOUR,@MIN,@SEC) )
   ClipPut("")
   $cli_cmd = stringformat("%s %d %d %d %d %s ", 'C:\Capture2Text\Capture2Text_CLI.exe -s "' , $x1, $y1, $x2, $y2, '" --clipboard')
   RunWait(@ComSpec & " /c" & $cli_cmd, 'C:\Capture2Text\', @SW_HIDE)
@@ -170,8 +208,8 @@ func OpticalRead ($x1,$y1,$x2,$y2)
   return( ClipGet() )
 endfunc
 
-;------------------------------------------------------------------------------- 
-;------------------------------------------------------------------------------- 
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
 GUISetState(@SW_SHOW)
 WHILE 1
   switch GUIGetMsg()
@@ -184,11 +222,11 @@ WHILE 1
   endif
 WEND
 GUIDelete()
-;------------------------------------------------------------------------------- 
-;------------------------------------------------------------------------------- 
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
 func IsKanaiEmpty($x,$y)
-  $x = 209+56*$x
-  $y = 404+56*$y
+  $x = Floor(209*$sRatio)+Floor(56*$sRatio)*$x
+  $y = Floor(404*$sRatio)+Floor(56*$sRatio)*$y
   local $r=0,$g=0,$b=0,$c=0
   for $i = $x-20 to $x+20 step 20
     for $j = $y-20 to $y+20 step 20
@@ -211,7 +249,7 @@ func IsRareItem($x,$y)
   local $timeout = SetTimeOut(500)    ;500ms timeout
   while NOT IsTimeOut($timeout)
     sleep(50)
-    if SearchPixel($x-349.5,400,$x-349.5,600,0xFFFF00,2) then  ;Yellow?
+    if SearchPixel($x-Floor(349.5*$sRatio),Floor(400*$sRatio),$x-Floor(349.5*$sRatio),Floor(600*$sRatio),0xFFFF00,2) then  ;Yellow?
       return(1)      ;then it is a Rare Item
 ;    elseif SearchPixel($x-351,450,$x-349,525,0xFF0000,4) then  ;Red?
 ;      return(1)      ;then it is an unsupported Rare item
@@ -241,9 +279,14 @@ func IsInventoryEmpty ($x,$y)
 endfunc
 
 func WaitDiablo3($GUIText)
-  $ABORT = false
+  local $enchantLeft = Floor(265*$sRatio)-Floor(80*$sRatio) ; 265-80
+  local $enchantTop = Floor(135*$sRatio)-Floor(10*$sRatio) ; 135-10
+  local $enchantRight = Floor(265*$sRatio)+Floor(80*$sRatio) ; 265+80
+  local $enchantBottom = Floor(135*$sRatio)+Floor(10*$sRatio) ; 135+10
+
+$ABORT = false
 ;  MouseMove(0,0,1)
-  Print("Waiting for " & $GUIText & " User Interface")
+;  Print(StringFormat("Waiting for %s User Interface", $GUIText))
 ;  while NOT WinActive("Diablo III")
 ;    WinActivate("Diablo III")
 ;    sleep(100)
@@ -251,9 +294,9 @@ func WaitDiablo3($GUIText)
 
   Print("Waiting for " & $GUIText)
   DO
-    ; Position of the Window Label "ENCHANT" 
-    local $text = OpticalRead(265-80,135-10,265+80,135+10)
-    Print("Waiting for " & $GUIText & " / " & $text)
+    ; Position of the Window Label "ENCHANT"
+    local $text = OpticalRead($enchantLeft,$enchantTop,$enchantRight,$enchantBottom)
+    Print(StringFormat("Waiting for %s - Response: %s " & @CRLF & "at (%d,%d) x (%d,%d) ", $GUIText, $text, $enchantLeft,$enchantTop,$enchantRight,$enchantBottom))
     sleep(500)
   UNTIL StringInStr($text,$GUIText)>0
   Print($GUIText & " Ready!")
@@ -261,6 +304,8 @@ func WaitDiablo3($GUIText)
 endfunc
 
 func KanaiCubeRecipe($pattern)
+
+
   $ABORT = false
   Print("Waiting for " & $pattern)
   DO
@@ -330,7 +375,7 @@ func ConvertMaterial()
       if $ABORT then exitloop
       if IsInventoryEmpty($x,$y)=0 then
         Print(stringformat("Converting Material (%d,%d)", $x,$y))
-        DO        
+        DO
           if $ABORT then exitloop
           ;put materials
           ClickMouse("Left",$FillX,$FillY,1,10)  ;Click "FILL" to put raw materials
@@ -384,9 +429,9 @@ func SalvageLegendary()
   $ABORT = true
 endfunc
 
-;------------------------------------------------------------------------------- 
+;-------------------------------------------------------------------------------
 ;        Myriam Functions
-;------------------------------------------------------------------------------- 
+;-------------------------------------------------------------------------------
 func Myriam()
   WaitDiablo3("ENCHANT")
 
@@ -402,11 +447,35 @@ func Myriam()
 
   local $OCR,$number
   local $text="Waiting for Item"
-  
-  local $x1=77, $x2=440
-  local $y0=395, $dy=44
+
+  local $mouseClickPosX = Floor(400*$sRatio)
+
+  ; Screen Locations of title bar
+  local $x1=Floor(77*$sRatio), $x2=Floor(440*$sRatio)
+  local $y0=Floor(395*$sRatio), $dy=Floor(44*$sRatio)
+
   ; Position of the "...Property to Replace" button
-  local $EnchantX=265, $EnchantY=780
+  local $EnchantX=Floor(265*$sRatio), $EnchantY=Floor(780*$sRatio)
+
+  ; Title Bar
+  local $titleBarLeft = Floor(125*$sRatio)
+  local $titleBarTop = Floor(349*$sRatio)
+  local $titleBarRight = Floor(400*$sRatio)
+  local $titleBarBottom = Floor(367*$sRatio)
+
+  ; CheckSum line
+  local $checkSumLeft = Floor(125*$sRatio)
+  local $checkSumTop = Floor(358*$sRatio)
+  local $checkSumRight = Floor(400*$sRatio)
+  local $checkSumBottom = Floor(358*$sRatio)
+
+  ; SearchPixel checking for reroll available
+  local $searchPixelLeft = Floor(82*$sRatio)
+  local $searchPixelTop = Floor(429*$sRatio)
+  local $searchPixelRight = Floor(86*$sRatio)
+  local $searchPixelBottom = Floor(490*$sRatio)
+
+  local $fontHeight = Floor(10*$sRatio)
 
   ;move mouse out of the way all the time to prevent interference
   MouseMove($EnchantX,$EnchantY,1)
@@ -414,13 +483,14 @@ func Myriam()
   WHILE (($Attempts>0) AND ($ABORT=false))
     if ($CheckSumReplace=0) then
       ; Position of the "Replace a Previously Enchanted Property" or "Select a Property to Replace"or "Select Replacement Property" header
-      ; Print("read title bar")
-      $text = OpticalRead(125,354-9,400,354+9)    ;read title bar
+      ;Print("read title bar")
+      $text = OpticalRead($titleBarLeft,$titleBarTop,$titleBarRight,$titleBarBottom)    ;read title bar
+	  Print("Current Text: " & $text)
       if StringInStr($text, "Replace a Previously Enchanted Property")>0 then
-        $CheckSumReplace = PixelCheckSum(125,361,400,361)
-        $text = "Replace Property"
+        $CheckSumReplace = PixelCheckSum($checkSumLeft,$checkSumTop,$checkSumRight,$checkSumBottom)
+        $text = "Item is Ready for Enchantment"
       endif
-    elseif $CheckSumReplace = PixelCheckSum(125,361,400,361) then
+    elseif $CheckSumReplace = PixelCheckSum($checkSumLeft,$checkSumTop,$checkSumRight,$checkSumBottom) then
 ;      Print("click reroll bar")
       ClickMouse("left", $EnchantX, $EnchantY, 1, 10)      ;click REROLL bar until actual enchanting
       sleep(250)
@@ -428,7 +498,7 @@ func Myriam()
 ;      Print("here they come")
       $text = ""
       if ($ThisChoice=-1) then
-        $OCR = OpticalRead($x1,$y0+$dy*0-10,$x2,$y0+$dy*0+10)
+        $OCR = OpticalRead($x1,$y0+$dy*0-$fontHeight,$x2,$y0+$dy*0+$fontHeight)
         if StringInStr($OCR, $DesiredProperty) then
           $number = GetNumber($OCR)
           if ($number >= $ThisNumber) then
@@ -439,7 +509,7 @@ func Myriam()
       endif
 
       ;1st Random Choice
-      $OCR = OpticalRead($x1,$y0+$dy*1-10,$x2,$y0+$dy*1+10)
+      $OCR = OpticalRead($x1,$y0+$dy*1-$fontHeight,$x2,$y0+$dy*1+$fontHeight)
       $number = GetNumber($OCR)
       $text &= "(" & $number & ") " & $OCR & @CRLF
       if StringInStr($OCR, $DesiredProperty) then
@@ -450,7 +520,7 @@ func Myriam()
       endif
 
       ;2nd Random Choice
-      $OCR = OpticalRead($x1,$y0+$dy*2-10,$x2,$y0+$dy*2+10)
+      $OCR = OpticalRead($x1,$y0+$dy*2-$fontHeight,$x2,$y0+$dy*2+$fontHeight)
       $number = GetNumber($OCR)
       $text &= "(" & $number & ") " & $OCR & @CRLF
       if StringInStr($OCR, $DesiredProperty) then
@@ -460,12 +530,13 @@ func Myriam()
         endif
       endif
 
-      Print("Counter: " & $Attempts & @CRLF & "Current Value: " & $ThisNumber & "/" & $DesiredNumber & " " & $DesiredProperty & @CRLF & $text)
-      while SearchPixel(84-2, 429, 84+2, 490, 0x6969FF, 4)  ;while there are still 2 rerolls to choose
+      ;Print("Counter: " & $Attempts & @CRLF & "Current Value: " & $ThisNumber & "/" & $DesiredNumber & " " & $DesiredProperty & @CRLF & $text)
+      while SearchPixel($searchPixelLeft, $searchPixelTop, $searchPixelRight, $searchPixelBottom, 0x6969FF, 4)
+        ;while there are still 2 rerolls to choose
         if ($ThisChoice=-1) then
-          ClickMouse("left", 400, $y0+$dy*0, 1, 10)
+          ClickMouse("left", $mouseClickPosX, $y0+$dy*0, 1, 10)
         else
-          ClickMouse("left", 400, $y0+$dy*$ThisChoice, 1, 10)
+          ClickMouse("left", $mouseClickPosX, $y0+$dy*$ThisChoice, 1, 10)
         endif
         ClickMouse("left", $EnchantX, $EnchantY, 1, 10)
         sleep(500)
@@ -478,7 +549,7 @@ func Myriam()
         exitloop
       endif
     endif
-;    Print("Counter: " & $Attempts & @CRLF & "Current Value: " & $ThisNumber & @CRLF & $text)
+    ;Print("Counter: " & $Attempts & @CRLF & "Current Value: " & $ThisNumber & @CRLF & $text)
     Sleep(100)
   WEND
   Print("Done")
