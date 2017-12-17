@@ -163,11 +163,13 @@ endfunc
 
 func OpticalRead ($x1,$y1,$x2,$y2)
 ;	Print( stringformat("%02d:%02d:%02d OCR",@HOUR,@MIN,@SEC) )
-	ClipPut("")
-	RunWait(stringformat("%s %d %d %d %d", 'C:\Capture2Text\Capture2Text.exe' , $x1, $y1, $x2, $y2), 'C:\Capture2Text\')
-	sleep(100)
-	return( ClipGet() )
+  ClipPut("")
+  $cli_cmd = stringformat("%s %d %d %d %d %s ", 'C:\Capture2Text\Capture2Text_CLI.exe -s "' , $x1, $y1, $x2, $y2, '" --clipboard')
+  RunWait(@ComSpec & " /c" & $cli_cmd, 'C:\Capture2Text\', @SW_HIDE)
+  sleep(100)
+  return( ClipGet() )
 endfunc
+
 ;------------------------------------------------------------------------------- 
 ;------------------------------------------------------------------------------- 
 GUISetState(@SW_SHOW)
