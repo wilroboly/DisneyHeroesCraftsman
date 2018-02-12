@@ -17,14 +17,6 @@ GLOBAL $fontOptionHeight = 11
 GLOBAL $fontQuality = $CLEARTYPE_QUALITY
 
 ;---------------------------------------------------------------------------------------------------
-; Left Window Position Constants
-;---------------------------------------------------------------------------------------------------
-GLOBAL $titleBarLeft = Floor(125*$sRatio)
-GLOBAL $titleBarTop = Floor(349*$sRatio)
-GLOBAL $titleBarRight = Floor(400*$sRatio)
-GLOBAL $titleBarBottom = Floor(367*$sRatio)
-
-;---------------------------------------------------------------------------------------------------
 ; D3 Window Constants
 ;---------------------------------------------------------------------------------------------------
 GLOBAL $sHeight = @DesktopHeight
@@ -38,15 +30,33 @@ GLOBAL $heightRatio=($sHeight/1080)
 GLOBAL $sRatio=$widthRatio
 
 ;---------------------------------------------------------------------------------------------------
+; Left Window Position Constants
+;---------------------------------------------------------------------------------------------------
+GLOBAL $titleBarLeft = Floor(125*$sRatio)
+GLOBAL $titleBarTop = Floor(349*$sRatio)
+GLOBAL $titleBarRight = Floor(400*$sRatio)
+GLOBAL $titleBarBottom = Floor(367*$sRatio)
+
+GLOBAL $windowLabelLeft = Floor(265*$sRatio)-Floor(80*$sRatio) ; 265-80
+GLOBAL $windowLabelTop = Floor(135*$sRatio)-Floor(10*$sRatio) ; 135-10
+GLOBAL $windowLabelRight = Floor(265*$sRatio)+Floor(80*$sRatio) ; 265+80
+GLOBAL $windowLabelBottom = Floor(135*$sRatio)+Floor(10*$sRatio) ; 135+10
+
+GLOBAL $windowPageLeft = Floor(665*$sRatio)
+GLOBAL $windowPageTop = Floor(785*$sRatio)
+GLOBAL $windowPageRight = Floor(775*$sRatio)
+GLOBAL $windowPageBottom = Floor(800*$sRatio)
+
+;---------------------------------------------------------------------------------------------------
 ; D3 Inventory Box Constants
 ;---------------------------------------------------------------------------------------------------
-GLOBAL $InvX=1428.5, $InvY=583      ;Center of top left item on backpack
-GLOBAL $DivInvX=50.5        ;inventory square X size
-GLOBAL $DivInvY=50        ;inventory square Y size
-GLOBAL $TransmuteX=264, $TransmuteY=827    ;transmute button
-GLOBAL $CraftedX=280, $CraftedY=420    ;top center item on kanai cube (cell10)
-GLOBAL $ForgeX=165, $ForgeY=288
-GLOBAL $FillX=718, $FillY=841      ;Kanai Recipe Fill
+GLOBAL $InvX=Floor(1428.5*$sRatio), $InvY=Floor(609.5*$sRatio)      ;Center of top left item on backpack
+GLOBAL $DivInvX=Floor(50.5*$sRatio)        ;inventory square X size
+GLOBAL $DivInvY=Floor(50*$sRatio)        ;inventory square Y size
+GLOBAL $TransmuteX=Floor(264*$sRatio), $TransmuteY=Floor(827*$sRatio)    ;transmute button
+GLOBAL $CraftedX=Floor(280*$sRatio), $CraftedY=Floor(420*$sRatio)    ;top center item on kanai cube (cell10)
+GLOBAL $ForgeX=Floor(165*$sRatio), $ForgeY=Floor(288*$sRatio)
+GLOBAL $FillX=Floor(718*$sRatio), $FillY=Floor(841*$sRatio)      ;Kanai Recipe Fill
 
 ;----------------------------------------------------------------------------
 ; Timing Routines
@@ -283,11 +293,6 @@ func IsInventoryEmpty ($x,$y)
 endfunc
 
 func WaitDiablo3($GUIText)
-  local $enchantLeft = Floor(265*$sRatio)-Floor(80*$sRatio) ; 265-80
-  local $enchantTop = Floor(135*$sRatio)-Floor(10*$sRatio) ; 135-10
-  local $enchantRight = Floor(265*$sRatio)+Floor(80*$sRatio) ; 265+80
-  local $enchantBottom = Floor(135*$sRatio)+Floor(10*$sRatio) ; 135+10
-
 $ABORT = false
 ;  MouseMove(0,0,1)
 ;  Print(StringFormat("Waiting for %s User Interface", $GUIText))
@@ -299,8 +304,8 @@ $ABORT = false
   Print("Waiting for " & $GUIText)
   DO
     ; Position of the Window Label "ENCHANT"
-    local $text = OpticalRead($enchantLeft,$enchantTop,$enchantRight,$enchantBottom)
-    Print(StringFormat("Waiting for %s - Response: %s " & @CRLF & "at (%d,%d) x (%d,%d) ", $GUIText, $text, $enchantLeft,$enchantTop,$enchantRight,$enchantBottom))
+    local $text = OpticalRead($windowLabelLeft,$windowLabelTop,$windowLabelRight,$windowLabelBottom)
+    Print(StringFormat("Waiting for %s - Response: %s " & @CRLF & "at (%d,%d) x (%d,%d) ", $GUIText, $text, $windowLabelLeft,$windowLabelTop,$windowLabelRight,$windowLabelBottom))
     sleep(500)
   UNTIL StringInStr($text,$GUIText)>0
   Print($GUIText & " Ready!")
@@ -308,13 +313,10 @@ $ABORT = false
 endfunc
 
 func KanaiCubeRecipe($pattern)
-
-
   $ABORT = false
   Print("Waiting for " & $pattern)
   DO
-;    local $text = OpticalRead(610,155,822,210)
-    local $text = OpticalRead(665,785,775,800)
+    local $text = OpticalRead($windowPageLeft,$windowPageTop,$windowPageRight,$windowPageBottom)
     Print("Waiting for " & $pattern & " / " & $text)
     sleep(500)
   UNTIL StringRegExp($text,'(?i)' & $pattern)>0
@@ -373,7 +375,7 @@ func ConvertMaterial()
   ;+----+----+----+
   ;| 02 | 12 | 22 |
   ;+----+----+----+
-  KanaiCubeRecipe("PAGE [789]")
+  KanaiCubeRecipe("PAGE [6789]")
   for $y = 0 to 5
     for $x = 0 to 9
       if $ABORT then exitloop
@@ -420,8 +422,8 @@ func SalvageLegendary()
         ClickMouse("Left", $InvX+$DivInvX*$x, $InvY+$DivInvY*$y, 1, 50)
         sleep(100)
         if SearchPixel(843-2, 373-2, 843+2, 373+2, 0xF3AA55, 8) then
-;          send("{ENTER}")
-          ClickMouse("Left", 843, 373, 1, 50)
+          send("{ENTER}")
+;          ClickMouse("Left", 843, 373, 1, 50)
         endif
         $try -= 1
       wend
@@ -534,7 +536,7 @@ func Myriam()
         endif
       endif
 
-      ;Print("Counter: " & $Attempts & @CRLF & "Current Value: " & $ThisNumber & "/" & $DesiredNumber & " " & $DesiredProperty & @CRLF & $text)
+      Print("Counter: " & $Attempts & @CRLF & "Current Value: " & $ThisNumber & "/" & $DesiredNumber & "/" & $number & " " & $DesiredProperty & @CRLF & $text)
       while SearchPixel($searchPixelLeft, $searchPixelTop, $searchPixelRight, $searchPixelBottom, 0x6969FF, 4)
         ;while there are still 2 rerolls to choose
         if ($ThisChoice=-1) then
