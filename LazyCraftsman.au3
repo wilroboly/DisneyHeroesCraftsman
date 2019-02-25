@@ -8,6 +8,7 @@
 #include <ColorConstants.au3>
 #include <FontConstants.au3>
 #include <Color.au3>
+#include <Array.au3>
 
 GLOBAL $TITLE = "The Lazy Craftsman 2.5";
 GLOBAL $sFont = "Calibri"
@@ -50,13 +51,17 @@ GLOBAL $windowPageBottom = Floor(800*$sRatio)
 ;---------------------------------------------------------------------------------------------------
 ; D3 Inventory Box Constants
 ;---------------------------------------------------------------------------------------------------
-GLOBAL $InvX=Floor(1428.5*$sRatio), $InvY=Floor(609.5*$sRatio)      ;Center of top left item on backpack
-GLOBAL $DivInvX=Floor(50.5*$sRatio)        ;inventory square X size
-GLOBAL $DivInvY=Floor(50*$sRatio)        ;inventory square Y size
-GLOBAL $TransmuteX=Floor(264*$sRatio), $TransmuteY=Floor(827*$sRatio)    ;transmute button
-GLOBAL $CraftedX=Floor(280*$sRatio), $CraftedY=Floor(420*$sRatio)    ;top center item on kanai cube (cell10)
-GLOBAL $ForgeX=Floor(165*$sRatio), $ForgeY=Floor(288*$sRatio)
-GLOBAL $FillX=Floor(718*$sRatio), $FillY=Floor(841*$sRatio)      ;Kanai Recipe Fill
+GLOBAL $InvX = Floor(1428.5*$sRatio), $InvY=Floor(609.5*$sRatio)                ;Center of top left item on backpack
+GLOBAL $DivInvX = Floor(50.5*$sRatio)                                           ;inventory square X size
+GLOBAL $DivInvY = Floor(50*$sRatio)                                             ;inventory square Y size
+GLOBAL $TransmuteX = Floor(264*$sRatio), $TransmuteY=Floor(827*$sRatio)         ;transmute button
+GLOBAL $KanaiRecipesX = Floor(432*$sRatio), $KanaiRecipesY=Floor(827*$sRatio)   ;Kanai Recipes page button
+GLOBAL $KanaiPagesX = Floor(857*$sRatio), $KanaiPagesY=Floor(830*$sRatio)       ;Kanai Page right button
+GLOBAL $CraftedX = Floor(280*$sRatio), $CraftedY=Floor(420*$sRatio)             ;top center item on kanai cube (cell10)
+GLOBAL $ForgeX = Floor(165*$sRatio), $ForgeY=Floor(288*$sRatio)                 ;Salvage Forge button
+GLOBAL $FillX = Floor(718*$sRatio), $FillY=Floor(841*$sRatio)                   ;Kanai Recipe Fill
+GLOBAL $avoidColumns[] = [10]
+GLOBAL $avoidCells[] = [1,2]
 
 ;----------------------------------------------------------------------------
 ; Timing Routines
@@ -129,7 +134,7 @@ HotKeySet( "^!x",  "Terminate" )
 ;  GUI Routines
 ;-------------------------------------------------------------------------------
 GLOBAL $DimX = 350
-GLOBAL $DimY = 300; 272
+GLOBAL $DimY = 350; 272
 GLOBAL $MW = GUICreate($TITLE, $DimX, $DimY)
 
 local $iY=8
@@ -138,8 +143,12 @@ local $hLabelA = GUICtrlCreateLabel("Options", 20,  $iY-5, $DimX-99, $fontLeadin
 local $hLabelB = GUICtrlCreateLabel("Ctrl-Alt-U: Kanai Upgrade Rare", 20, 25+$iY, $DimX-99, $fontLeading)
 local $hLabelC = GUICtrlCreateLabel("Ctrl-Alt-C: Kanai Convert Mats", 20, 45+$iY, $DimX-40, $fontLeading)
 local $hLabelD = GUICtrlCreateLabel("Ctrl-Alt-S: BlackSmith Salvage", 20, 65+$iY, $DimX-40, $fontLeading)
+local $hLabel01 = GUICtrlCreateLabel("Avoid Cols:   ", 30, 85+$iY, 80, $fontLeading + 2)
+local $hInput01 = GUICtrlCreateInput(_ArrayToString($avoidColumns, ','), 115, 82+$iY,$DimX-135, 22)
+local $hLabel02 = GUICtrlCreateLabel("Avoid Rows:   ", 30, 105+$iY, 80, $fontLeading + 2)
+local $hInput02 = GUICtrlCreateInput(_ArrayToString($avoidCells, ','), 115, 102+$iY,$DimX-135, 22)
 
-$iY += 87
+$iY += 125
 GUICtrlCreateGroup("", 11, $iY, $DimX-22,105)
 local $hLabelE = GUICtrlCreateLabel("Ctrl-Alt-M: Myriam Enchantment", 20, $iY, $DimX-99, $fontLeading)
 local $hLabel1 = GUICtrlCreateLabel("Property:", 30, 25+$iY, 80, $fontLeading + 2)
@@ -164,6 +173,13 @@ GUICtrlSetFont($hLabelB,  $fontOptionHeight, $FW_MEDIUM, 0, $sFont, $fontQuality
 
 GUICtrlSetFont($hLabelC,  $fontOptionHeight, $FW_MEDIUM, 0, $sFont, $fontQuality)
 GUICtrlSetFont($hLabelD,  $fontOptionHeight, $FW_MEDIUM, 0, $sFont, $fontQuality)
+
+GUICtrlSetFont($hLabel01,  $fontOptionHeight, $FW_MEDIUM, 0, $sFont, $fontQuality)
+GUICtrlSetFont($hInput01,  $fontOptionHeight, $FW_NORMAL, 0, $sFont, $fontQuality)
+
+GUICtrlSetFont($hLabel02,  $fontOptionHeight, $FW_MEDIUM, 0, $sFont, $fontQuality)
+GUICtrlSetFont($hInput02,  $fontOptionHeight, $FW_NORMAL, 0, $sFont, $fontQuality)
+
 GUICtrlSetFont($hLabelE,  $fontOptionHeight, $FW_MEDIUM, 0, $sFont, $fontQuality)
 
 GUICtrlSetFont($hLabel1,  $fontOptionHeight, $FW_MEDIUM, 0, $sFont, $fontQuality)
@@ -324,8 +340,14 @@ func KanaiCubeRecipe($pattern)
   return(1)
 endfunc
 
+func GoToPage($pattern)
+  ClickMouse("Left",$KanaiRecipesX,$KanaiRecipesY,1,10)
+  ClickMouse("Left",$KanaiPagesX,$KanaiPagesY,$pattern-1,10)
+EndFunc
+
 func UpgradeRares()
   WaitDiablo3("CUBE")
+  GoToPage(3)
   ;Kanai Coordinates
   ;+----+----+----+
   ;| 00 | 10 | 20 |
@@ -405,32 +427,40 @@ func ConvertMaterial()
 endfunc
 
 func SalvageLegendary()
+  local $searchPixelLeft = Floor(841*$sRatio)
+  local $searchPixelTop = Floor(371*$sRatio)
+  local $searchPixelRight = Floor(845*$sRatio)
+  local $searchPixelBottom = Floor(375*$sRatio)
   WaitDiablo3("SALVAGE")
-  ClickMouse("Left", 510, 479, 3, 100)
+
+  $arrAvoidColumns = StringSplit(GUICtrlRead($hInput01), ',',$STR_NOCOUNT )
+  $arrAvoidCells = StringSplit(GUICtrlRead($hInput02), ',',$STR_NOCOUNT )
+
+  ; Click the Legendary Salvage button
   ClickMouse("Left", $ForgeX, $ForgeY, 1, 100)
+
   for $y = 0 to 5
-    if ($y=5) then
-      $x=1
-    else
-      $x = 0
-    endif
+    $x = 0
     while ($x<10)
       if $ABORT then exitloop
-      local $try = 2
-      Print(stringformat("Salvage Item (%d,%d)", $x,$y))
-      while ($try>0) AND (IsInventoryEmpty($x,$y)=0)
-        ClickMouse("Left", $InvX+$DivInvX*$x, $InvY+$DivInvY*$y, 1, 50)
-        sleep(100)
-        if SearchPixel(843-2, 373-2, 843+2, 373+2, 0xF3AA55, 8) then
-          send("{ENTER}")
-;          ClickMouse("Left", 843, 373, 1, 50)
-        endif
-        $try -= 1
-      wend
+      if ((_ArraySearch($arrAvoidColumns,$x+1) >= 0) AND (_ArraySearch($arrAvoidCells, $y+1) >= 0)) Then
+        ; reconsider life! Do nothing!
+      Else
+          local $try = 2
+          Print(stringformat("Salvage Item (%d,%d)", $x,$y))
+          while ($try>0) AND (IsInventoryEmpty($x,$y)=0)
+            ClickMouse("Left", $InvX+$DivInvX*$x, $InvY+$DivInvY*$y, 1, 50)
+            sleep(50)
+            if SearchPixel($searchPixelLeft, $searchPixelTop, $searchPixelRight, $searchPixelBottom, 0xF3AA55, 8) then
+              ; Use Enter key as oppose to click location. Faster and easier.
+              send("{ENTER}")
+            endif
+            $try -= 1
+          wend
+      EndIf
       $x += 1
     wend
   next
-;  ClickMouse("Right", $InvX+$DivInvX*9, $InvY+$DivInvY*5, 3, 10)
   Print("Done Salvaging.")
   $ABORT = true
 endfunc
